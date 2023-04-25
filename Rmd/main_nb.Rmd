@@ -1,0 +1,65 @@
+---
+title: "Template"
+output:
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    number_sections: true
+    smart: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(knitr.kable.NA = "")
+# load required `targets` objects (to make them dependencies)
+tar_load(d_main)
+# d_main <- params$d_main[[1]]
+tar_load(exp_cols)
+theme_set(theme_light())
+```
+
+# Explanation of variables: missing values removed
+
+```{r results='asis', warning=FALSE}
+invisible(lapply(
+  syms(exp_cols),
+  explain_rmd,
+  na.rm = TRUE,
+  df = d_main
+))
+```
+
+# Explanation of variables: missing values kept
+
+```{r results='asis', warning=FALSE}
+invisible(lapply(
+  syms(exp_cols),
+  explain_rmd,
+  na.rm = FALSE,
+  df = d_main
+))
+```
+
+# Multivarié
+
+```{r, results='asis'}
+d_curr <- d_main
+
+fmlas <- list(
+  thing ~ from + stuff,
+  thing ~ from + other + stuff
+)
+
+purrr::walk(
+  fmlas,
+  function(fmla) {
+    cat("## ")
+    cat(format(fmla))
+    cat("\n\n")
+    cat(alg_reg_auto(d_curr, fmla, accuracy = 0.001))
+    cat("\n\n")
+  }
+)
+```
+
